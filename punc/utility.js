@@ -6,18 +6,27 @@ var PlainText;
 var Reg = /[，。、：；？！“”‘’「」『』·…（）【】《》]/g;
 var URL = "http://192.168.16.232:####/translator/translate";
 var clipboard1, clipboard2;
-var TestText="如是我聞：一時，婆伽婆入於神通大光明藏，三昧正受，一切如來光嚴住持，是諸眾生清淨覺地；身心寂滅平等本際，圓滿十方不二隨順，於不二境現諸淨土。與大菩薩摩訶薩十萬人俱，其名曰文殊師利菩薩、普賢菩薩、普眼菩薩、金剛藏菩薩、彌勒菩薩、清淨慧菩薩、威德自在菩薩、辯音菩薩、淨諸業障菩薩、普覺菩薩、圓覺菩薩、賢善首菩薩等，而為上首；與諸眷屬皆入三昧，同住如來平等法會。\n\n於是文殊師利菩薩在大眾中即從座起，頂禮佛足右遶三匝，長跪叉手而白佛言：「大悲世尊！願為此會諸來法眾，說於如來本起清淨因地法行，及說菩薩於大乘中發清淨心，遠離諸病，能使未來末世眾生求大乘者不墮邪見。」作是語已五體投地，如是三請終而復始。\n\n爾時，世尊告文殊師利菩薩言：「善哉！善哉！善男子！汝等乃能為諸菩薩諮詢如來因地法行，及為末世一切眾生求大乘者，得正住持不墮邪見。汝今諦聽！當為汝說。」時，文殊師利菩薩奉教歡喜，及諸大眾默然而聽。"
+var version = [
+    { 'text': '版本1', 'port': '7786', 'title': '1.0.7786' },
+    { 'text': '版本2', 'port': '7785', 'title': '1.0.7785' },
+    { 'text': '版本3', 'port': '7784', 'title': '1.0.7784' },
+    { 'text': '版本4', 'port': '7783', 'title': '1.0.7783' }];
+
+var TestText = "如是我聞：一時，婆伽婆入於神通大光明藏，三昧正受，一切如來光嚴住持，是諸眾生清淨覺地；身心寂滅平等本際，圓滿十方不二隨順，於不二境現諸淨土。與大菩薩摩訶薩十萬人俱，其名曰文殊師利菩薩、普賢菩薩、普眼菩薩、金剛藏菩薩、彌勒菩薩、清淨慧菩薩、威德自在菩薩、辯音菩薩、淨諸業障菩薩、普覺菩薩、圓覺菩薩、賢善首菩薩等，而為上首；與諸眷屬皆入三昧，同住如來平等法會。\n\n\
+舍利弗謂須菩提：「菩薩當云何行般若波羅蜜，得般若波羅蜜？」\n\n\
+「舍利弗！於汝意云何？何故名為『一切諸佛所護念經』？舍利弗！若有善男子、善女人，聞是經受持者，及聞諸佛名者；是諸善男子、善女人，皆為一切諸佛共所護念，皆得不退轉於阿耨多羅三藐三菩提。是故舍利弗！汝等皆當信受我語及諸佛所說。\n\n\
+《老子》曰：知其白，守其黑。又曰：歸根曰靜，靜曰復命是也。夫玄一者，提我元命真人也，但坐而守之，守之極靜，於至靜之中，圓光之內，忽見我之真形者，是玄一，得之守之，則不復去矣。（出自《道藏》）"
 
 // -------------------------------------------------
 $(document).ready(function () {
-    $("#card2").hide();
-    $("#btn3").hide();
-    $("#btn4").hide();
-    $("#btn3").css("display", "");
-    $("#btn4").css("display", "");
+    // $("#card2").hide();
+    // $("#btn3").hide();
+    // // $("#btn4").hide();
+    // $("#btn3").css("display", "");
+    // $("#btn4").css("display", "");
     clipboard1 = new Clipboard('#btn2');
     clipboard2 = new Clipboard('#btn3');
-    Port = $('#btnGroupDrop1')[0].dataset.port;
+    makeMune(version);
 
     $("#sendText").keyup(function () {
         check("#sendText", '#tip1');
@@ -32,12 +41,36 @@ $(document).ready(function () {
     check("#sendText", '#tip1');
 })
 
-var process = function () {
-    if ($("#btn1").text() != "发送") {
-        ctoggle();
-        $("#btn4").text("对比");
-        return;
+var makeMune = function (list) {
+    for (var i = 0; i < list.length; i++) {
+        var adata = list[i];
+        var a = createE("a");
+        a.className = "dropdown-item";
+        a.title = adata.title;
+        a.innerHTML = adata.text;
+        a.dataset.port = adata.port;
+        a.onclick = function (e) {
+            // print(e.srcElement);
+            select(e.srcElement);
+        };
+        $("#dropMenu").append(a);
     }
+    $("#dropMenu").append('<div class="dropdown-divider"></div>');
+    var a = createE("a");
+    a.className = "dropdown-item";
+    a.innerHTML = '全部版本';
+    a.onclick = function (e) {
+        select(e.srcElement);
+    };
+    $("#dropMenu").append(a);
+}
+
+var process = function () {
+    // if ($("#btn1").text() != "发送") {
+    //     ctoggle();
+    //     $("#btn4").text("对比");
+    //     return;
+    // }
 
     var txt = $("#sendText").val();
     if (txt == "")
@@ -70,32 +103,37 @@ var process = function () {
 var check = function (e, t) {
     if ('#sendText' == e) {
         $(e)[0].style.height = 'auto';
-        // $(e)[0].style.eight = '100px';
         $(e)[0].style.height = $(e)[0].scrollHeight + 'px';
-        // $(e)[0].style.scrollHeight = $(e)[0].scrollHeight + 'px';
-        console.log($(e))
+
+        print($(e))
         var str = $(e).val();
-        // $("#sendText").val(OriText);
-        // if (str == '')
-        //     return;
     }
     else
         var str = $(e).text();
     pstr = repPunc(str, '');
     punc = str.replace(/[^，。、：；？！“”‘’「」『』·…（）【】《》]/g, '');
-    // console.log(pstr);
-    // console.log(punc);
+    // print(pstr);
+    // print(punc);
 
     $(t).html("字数:" + str.length + "(" + pstr.length + "/" + punc.length + ")");
 }
 
 var select = function (e) {
-    var p = e.dataset.port;
     var t = e.text;
-    Port = p;
-    $('#btnGroupDrop1').text(t);
-    console.log($('#btnGroupDrop1'));
-    $('#btnGroupDrop1')[0].dataset.port = p;
+    if( t==="全部版本"){
+        for(var i=0;i<version.length;i++){
+            var p=version[i].port;
+            Port = p;
+            setTimeout(process, 100);
+        }
+        $('#btnGroupDrop1').text("选择标点版本");
+    }
+    else{
+        var p = e.dataset.port;
+        Port = p;
+        $('#btnGroupDrop1').text(t);
+        setTimeout(process, 100);
+    }
 }
 
 var compare = function () {
@@ -112,18 +150,17 @@ var compare = function () {
     var newMap = oriMap.concat(proMap);
 
     newMap = mapProcess(newMap);
-    // console.log(newMap);
     var newTxt = combine(PlainText, newMap);
     newTxt = spanner(newTxt);
 
     for (var i = 0; i < newMap.length; i++) {
-        var chr = newMap[i].slice(-4, -3);
-        var tag = newMap[i].slice(-3);
+        var tag = newMap[i].replace(/[^a-z]/g,'');
+        var chr = newMap[i].replace(/[\n-~]/g,'');
         newTxt = newTxt.replace('<span class="word">' + chr + '<\/span>', '<span class="' + tag + '">' + chr + '<\/span>');
     }
 
     $("#result").html(newTxt);
-    var note = '&ensp;<span class="ori">原始文本</span>&ensp;<span class="pro">已标点文本</span>';
+    var note = '&ensp;<span class="ori">原始</span>&ensp;<span class="pro">已标点</span>';
     $("#tip2").html($("#tip2").html() + note);
 }
 
@@ -137,45 +174,42 @@ var clearAll = function () {
 // -------------------------------------------------
 var mapProcess = function (map) {
     map = map.sort();
-    // map = map.reverse();
-    for (var i = 0; i < map.length; i++) {
-        
-        var a = map[i];
-        var b = map[i + 1];
-        var c = map[i + 2];
-        if (parseInt(a) == parseInt(b)) {
-            if (a[16] === b[16]) {
+    print(map+'');
+    for (var i = 2; i < map.length; i++) {
+        var a = map[i - 2];
+        var b = map[i - 1];
+        var c = map[i - 0];
+        var chra = a.replace(/[^a-z]/g,'');
+        var chrb = b.replace(/[^a-z]/g,'');
+        var chrc = c.replace(/[^a-z]/g,'');
+
+        if (chra != chrb && parseInt(a) == parseInt(b)) {
+            if (a[19] === b[19]) {
                 a = a.replace('ori', 'sam').replace('pro', 'sam');
-                b = '9999';
-                map[i]=a;
-                map[i + 1]=b;
-                map = map.sort();
-                map.pop();                
+                b = ' ';
             }
         }
-        if (parseInt(a) == parseInt(c)) {
-            if (a[16] === c[16]) {
+        if (chra != chrc && parseInt(a) == parseInt(c)) {
+            if (a[19] === c[19]) {
                 a = a.replace('ori', 'sam').replace('pro', 'sam');
-                c = '9999';
-                map[i]=a;
-                map[i + 2]=c;
-                map = map.sort();
-                map.pop();                
+                c = '9999';   
             }
         }
-        if (parseInt(b) == parseInt(c)) {
-            if (b[16] === c[16]) {
+        if (chrb != chrc && parseInt(b) == parseInt(c)) {
+            if (b[19] === c[19]) {
                 b = b.replace('ori', 'sam').replace('pro', 'sam');
                 c = '9999';
-                map[i + 1]=b;
-                map[i + 2]=c;
-                map = map.sort();
-                map.pop();                
             }
         }
+        map[i - 2] = a;
+        map[i - 1] = b;
+        map[i - 0] = c; 
     }
-
-    console.log(map);
+    map = map.sort();
+    var loca=map.indexOf('9999');
+    if (loca!=-1)
+        map=map.slice(0,loca);
+    print(map);
     return map;
 }
 
@@ -189,10 +223,10 @@ var pcMap = function (str, mark) {
         std = std.replace('#', '');
         str = str.slice(0, index) + str.slice(index + 1);
         index = justify(index, 10);
-        map.push(index + '-' + justify(num, 4) + '-' + val + mark);
+        map.push(index + '-'+ mark + justify(num, 4) + '-' + val );
         num++;
     }
-    console.log(map);
+    print(map);
     return map;
 }
 
@@ -210,7 +244,7 @@ var combine = function (str, map) {
     map = map.reverse();
     for (var i = 0; i < map.length; i++) {
         var index = parseInt(map[i]);
-        str = str.slice(0, index) + map[i].charAt(map[i].length - 4) + str.slice(index);
+        str = str.slice(0, index) + map[i].charAt(map[i].length - 1) + str.slice(index);
     }
     map = map.reverse();
     return str;
@@ -263,16 +297,16 @@ var setResult = function () {
 }
 
 var ctoggle = function () {
-    if ($("#btn1").text() == "发送")
-        $("#btn1").text("返回");
-    else
-        $("#btn1").text("发送");
+    // if ($("#btn1").text() == "发送")
+    //     $("#btn1").text("返回");
+    // else
+    //     $("#btn1").text("发送");
 
-    $("#btn2").toggle();
-    $("#btn3").toggle();
-    $("#btn4").toggle();
-    $("#card1").toggle();
-    $("#card2").toggle();
+    // $("#btn2").toggle();
+    // $("#btn3").toggle();
+    // $("#btn4").toggle();
+    // $("#card1").toggle();
+    // $("#card2").toggle();
 }
 
 var spanner = function (txt) {
@@ -312,29 +346,29 @@ var showTooltip = function () {
         $('#tooltip').fadeIn();
     });
     $(document).click(function (e) {
-        $('#tooltip').fadeOut();        
+        $('#tooltip').fadeOut();
     });
 }
 
-var setTooltip = function (lis) {     
+var setTooltip = function (lis) {
     $('#tooltip').append("<p id='tooltitle'>比例</p>");
-    for (var i=0;i<lis.length;i++){
-        var Div=document.createElement("div");
+    for (var i = 0; i < lis.length; i++) {
+        var Div = createE("div");
 
-        var title=document.createElement("span");
-        title.className='title';
-        title.innerHTML=lis[i].p;
-        
-        var data=document.createElement("span");
-        data.className='data';
+        var title = createE("span");
+        title.className = 'title';
+        title.innerHTML = lis[i].p;
 
-        var progress=document.createElement("div");
-        progress.className='progress';
+        var data = createE("span");
+        data.className = 'data';
 
-        var progressbar=document.createElement("div");
-        progressbar.className='progress-bar';
-        progressbar.style="width:"+lis[i].v;
-        progressbar.innerHTML=lis[i].v;
+        var progress = createE("div");
+        progress.className = 'progress';
+
+        var progressbar = createE("div");
+        progressbar.className = 'progress-bar';
+        progressbar.style = "width:" + lis[i].v;
+        progressbar.innerHTML = lis[i].v;
 
         progress.appendChild(progressbar);
         data.appendChild(progress);
@@ -342,6 +376,13 @@ var setTooltip = function (lis) {
         Div.appendChild(title);
         Div.appendChild(data);
         $('#tooltip').append(Div);
-    }   
+    }
 }
 
+var createE = function (e) {
+    return document.createElement(e);
+}
+
+var print=function (param) {  
+    console.log(param);
+}

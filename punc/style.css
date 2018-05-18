@@ -15,6 +15,10 @@ header {
     z-index: 2000;
 }
 
+main{
+    margin-top: 100px;
+}
+
 /* ==================================================== */
 
 body>.container {
@@ -63,30 +67,50 @@ textarea {
 }
 
 span.pro {
+    color: black;
     background-color: rgb(128, 255, 128);
 }
 
 span.ori {
+    color: black;
     background-color: rgb(255, 128, 128);
 }
 
+span.sam {
+    color: black;
+    /* background-color: rgb(255, 128, 128); */
+}
+
+span.sam:hover {
+    color: white;    
+    background-color: rgb(51, 144, 255);
+}
 #result>span.word:hover {
     color: white;
     background-color: rgb(51, 144, 255);
 }
 
-#result>span.word:active {
-
+/* #result>span.word:active {
     background-color: rgb(0, 64, 255);
+} */
+
+span.pro:hover {
+    color:white;
+    background-color: rgb(0, 224, 0);
 }
 
-#btn3 {
-    display: none;
+span.ori:hover {
+    color:white;
+    background-color: rgb(255, 0, 0);
 }
 
-#btn4 {
+/* #btn3 {
     display: none;
-}
+} */
+
+/* #btn4 {
+    display: none;
+} */
 /* ==================================================== */
 #tooltip {
     text-align: center;
