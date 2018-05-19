@@ -19,14 +19,15 @@ var TestText = "如是我聞：一時，婆伽婆入於神通大光明藏，三�
 
 // -------------------------------------------------
 $(document).ready(function () {
-    // $("#card2").hide();
-    // $("#btn3").hide();
-    // // $("#btn4").hide();
-    // $("#btn3").css("display", "");
-    // $("#btn4").css("display", "");
+    $("#card2").hide();
+    $("#btn3").hide();
+    $("#btn4").hide();
+    $("#btn3").css("display", "");
+    $("#btn4").css("display", "");
     clipboard1 = new Clipboard('#btn2');
     clipboard2 = new Clipboard('#btn3');
-    makeMune(version);
+    // makeMune(version);
+    Port = $('#btnGroupDrop1')[0].dataset.port;
 
     $("#sendText").keyup(function () {
         check("#sendText", '#tip1');
@@ -66,11 +67,11 @@ var makeMune = function (list) {
 }
 
 var process = function () {
-    // if ($("#btn1").text() != "发送") {
-    //     ctoggle();
-    //     $("#btn4").text("对比");
-    //     return;
-    // }
+    if ($("#btn1").text() != "发送") {
+        ctoggle();
+        $("#btn4").text("对比");
+        return;
+    }
 
     var txt = $("#sendText").val();
     if (txt == "")
@@ -297,16 +298,16 @@ var setResult = function () {
 }
 
 var ctoggle = function () {
-    // if ($("#btn1").text() == "发送")
-    //     $("#btn1").text("返回");
-    // else
-    //     $("#btn1").text("发送");
+    if ($("#btn1").text() == "发送")
+        $("#btn1").text("返回");
+    else
+        $("#btn1").text("发送");
 
-    // $("#btn2").toggle();
-    // $("#btn3").toggle();
-    // $("#btn4").toggle();
-    // $("#card1").toggle();
-    // $("#card2").toggle();
+    $("#btn2").toggle();
+    $("#btn3").toggle();
+    $("#btn4").toggle();
+    $("#card1").toggle();
+    $("#card2").toggle();
 }
 
 var spanner = function (txt) {
