@@ -5,24 +5,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>自动标点V2</title>
-    <!-- 可选meta -->
     <meta name="description" content="punctuation">
     <meta name="author" content="SXJ">
-    <!-- <link rel="icon" href="https://code.z01.com/favicon.ico"> -->
-    <script src="http://me.52fhy.com/doc/clipboardjs/dist/clipboard.min.js"></script>
 
     <link rel="stylesheet" href="./punc/bootstrap.min.css">
     <script src="./punc/jquery.min.js"></script>
     <script src="./punc/popper.min.js"></script>
     <script src="./punc/bootstrap.min.js"></script>
+    <script src="./punc/clipboard.min.js"></script>
 
-    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->-->
-
-    <link rel="stylesheet" href="./punc/style.css">
-    <script src="./punc/utility.js"></script>
+    <!-- <script src="http://me.52fhy.com/doc/clipboardjs/dist/clipboard.min.js"></script> -->
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
+    <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script> -->
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>  -->
 
 </head>
 
@@ -30,55 +26,91 @@
     <header class="fixed-top bg-light">
         <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
             <a class="navbar-brand" href="#">自动标点</a>
+            <div class="navbar-nav mr-auto"></div>
+
+            <div class="dropdown">
+                <a class="dropdown-toggle text-light disabled" href="#" data-toggle="dropdown">登录</a>
+                <div id="dropMenu2" class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item">设置</a>
+                    <a class="dropdown-item">退出</a>
+                </div>
+            </div>
         </nav>
 
-        <div class="btn-toolbar" role="toolbar" style="float: right;padding-top:3px;padding-bottom:3px">
-            <div class="btn-group mr-2" role="group">
-                <button type="button" id="btn1" class="btn btn-outline-primary" onclick="process()">发送</button>
-                <button type="button" id="btn2" class="btn btn-outline-warning" data-clipboard-target="#sendText">复制</button>
-                <button type="button" id="btn3" class="btn btn-outline-warning" data-clipboard-target="#result">复制</button>
-                <button type="button" id="btn4" class="btn btn-outline-danger" onclick="compare()">对比</button>
-                <div class="btn-group" role="group">
-                    <button id="btnGroupDrop1" type="button" class="btn btn-outline-success dropdown-toggle" data-port="7784" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">版本3</button>
-                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                        <a class="dropdown-item" data-port="7786" title="V1.0.7786" onclick="select(this)">版本1</a>
-                        <a class="dropdown-item" data-port="7785" title="V1.0.7785" onclick="select(this)">版本2</a>
-                        <a class="dropdown-item" data-port="7784" title="V1.0.7784" onclick="select(this)">版本3</a>
-                        <a class="dropdown-item" data-port="7783" title="V1.0.7783" onclick="select(this)">版本4</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <nav id="tabbar" class="navbar navbar-expand-sm bg-light navbar-dark">
+            <ul id="tabTitle" class="nav nav-tabs">
+                <li class="nav-item">
+                    <a id="tablink000" class="nav-link" data-toggle="tab" href="#tab000">V0</a>
+                </li>
+            </ul>
+        </nav>
     </header>
 
-    <main role="main" style="margin-top: 100px;">
-        <div class="container-fluid">
-            <div class="card" id="card1">
-                <div class="card-header">待处理文本</div>
-                <div class="card-body" style="padding:5px">
-                    <button type="button" class="close" onclick="clearAll()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <textarea id="sendText" class="container-fluid" maxlength="65535" placeholder="粘贴文本到这里" onchange="check('#sendText','#tip1')"></textarea>
-                    <p id='tip1' class='tips'>&nbsp;</p>
+    <div id="tabContent" class="tab-content">
+        <div id="tab000" class="tab-pane fade container-fluid active">
+            <div class="card">
+                <div class="card-header">
+                    <span class="cardTitle">原始文本</span>
+                    <span class="docker">
+                        <button id="modal" class="btn btn-primary" data-toggle="modal" data-target="#myModal">模态框</button>
+                        <button id="copy000" class="btn btn-outline-warning" data-target="#result000" onclick="copyTxt(this)";
+                        }>复制</button>
+                        <button class="btn btn-outline-info" data-target="#result000" onclick="clearTxt(this)">清除</button>
+                        <button type="button" class="btn btn-outline-success dropdown-toggle" data-toggle="dropdown">选择标点版本
+                        </button>
+                        <div id="dropMenu" class="dropdown-menu dropdown-menu-right"></div>
+                    </span>
                 </div>
-            </div>
-            <div class="card" id="card2" style="display:none">
-                <div class="card-header">标点结果</div>
-                <div class="card-body" style="padding:5px">
-                    <div id='tooltip'></div>
-                    <div id='result' contenteditable="false" class="container-fluid boder border-dark rounded-0">
-                    </div>
-                    <p id='tip2' class='tips'>&nbsp;</p>
+                <div class="card-body">
+                    <textarea id="result000" class="container-fluid" maxlength="65535" placeholder="粘贴文本到这里" onchange="check('#result000','#tip1')"></textarea>
+                    <p id='tip000' class='tips'>&nbsp;</p>
                 </div>
             </div>
         </div>
-    </main>
-
-    <div id='foot' class="text-muted fixed-bottom" style="text-align: center">
-        <p>&copy; 2018-5-8</p>
     </div>
+
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h4 class="modal-title">选择对比版本</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <div id="radioGroup" class="modal-body row">
+                    <form action="" class="col-sm">
+                        <ul class="list-group border">
+                            <li class="dropdown-item">
+                                <input type="radio" name="version" value="V0">
+                                <span>V0</span>
+                            </li>
+                        </ul>
+                    </form>
+                    <form action="" class="col-sm">
+                        <ul class="list-group border">
+                            <li class="dropdown-item">
+                                <input type="radio" name="version" value="V1">
+                                <span>V1</span>
+                            </li>
+                        </ul>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button id="OKbtn" type="button" class="btn btn-success" data-dismiss="modal" onclick="comparePro()">OK</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-muted" style="text-align: center">
+        <p>&copy; 2018-5-8</p>
+    </footer>
 </body>
+
+<link rel="stylesheet" href="./punc/style.css">
+<script src="./punc/utility.js"></script>
 
 </html>

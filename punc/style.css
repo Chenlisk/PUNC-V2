@@ -1,12 +1,8 @@
-/* ==================================================== */
-
-html {
-    position: relative;
-    min-height: 90%;
-}
+/* ==================================================== Basic*/
 
 body {
     font-family: '等线', '微软雅黑', '黑体';
+    padding-top: 100px;
     /* Margin bottom by footer height */
     /* margin-bottom: 40px; */
 }
@@ -19,30 +15,58 @@ main{
     margin-top: 100px;
 }
 
-/* ==================================================== */
+/* ====================================================MainElem */
 
 body>.container {
     padding: 50px 15px 0;
 }
 
-textarea {
+textarea {    
+    border: 1px solid lightgray;
     font-size: 18px;
     min-height: 300px;
-    padding-top: 10px;
-    padding-bottom: 10px;
     height: auto;
-    color: rgb(64, 64, 64);
     overflow: hidden;
     resize: none;
 }
 
-#result {
+
+div.Result{
+    width: 100%;
+    height: auto;
+    min-height: 300px;
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: 15px;
+    padding-left: 15px;
+    border: 1px solid lightgray;
+    font-size: 18px;
+    color: rgb(0, 200, 100);
+    color: rgb(0, 160, 80);
+    word-wrap: normal;
+    word-break: normal;
+    white-space: normal;
+    overflow-x: visible;
+}
+
+div.Result>span {
+    border-radius: 4px;
+    cursor: default;
+}
+
+div.Result>span.word:hover {
+    color: white;
+    background-color: rgb(51, 144, 255);
+}
+
+
+
+
+div.Compare{    
+    border: 1px solid lightgray;
     font-size: 18px;
     min-height: 300px;
-    color: rgb(0, 128, 128);
-    color: rgb(0, 128, 255);
-    color: rgb(0, 100, 240);
-    border: 1px solid black;
+    color: rgb(0, 100, 200);
     word-wrap: normal;
     word-break: normal;
     white-space: normal;
@@ -50,21 +74,103 @@ textarea {
     overflow-x: visible;
 }
 
+div.Compare>span {
+    border-radius: 4px;
+    cursor: default;
+}
+
+div.Compare>span.word:hover {
+    color: white;
+    background-color: rgb(51, 144, 255);
+}
+
+p.tips>span{
+    cursor: default;
+    border-radius: 4px;
+    padding: 2px;
+}
+
 .tips {
     margin: 0px;
     font-size: 14px;
 }
 
+
+
+
+#modal{
+    display: none;
+}
+
+button{
+    margin: 1px;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+
+#tabContent{
+    height: auto;
+    min-height: 100%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+
+
 .dropdown-item {
     cursor: pointer;
 }
 
-
-
-#result>span {
-    border-radius: 4px;
-    cursor: default;
+.card-header{
+    padding: 3px;
+    padding-left: 10px;
 }
+
+.card-header>.cardTitle{
+    margin-top: 7px;
+    display: inline-block;
+}
+
+.card-body{
+    padding: 5px;
+}
+
+
+
+.nav-link.active{
+    background-color: green;
+}
+
+.nav-item{
+    font-size: 14px;
+}
+
+#tabbar{
+    padding-top: 4px;
+    padding-bottom: 0px;
+    /* border-bottom: 1px solid lightgray; */
+}
+
+a.nav-link{ 
+    /* border: 1px solid transparent; */
+    cursor: pointer;
+    /* cursor: default; */
+    padding: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+
+
+
+
+
+
+
+
+
+
 
 span.pro {
     color: black;
@@ -85,14 +191,9 @@ span.sam:hover {
     color: white;    
     background-color: rgb(51, 144, 255);
 }
-#result>span.word:hover {
-    color: white;
-    background-color: rgb(51, 144, 255);
-}
 
-/* #result>span.word:active {
-    background-color: rgb(0, 64, 255);
-} */
+
+
 
 span.pro:hover {
     color:white;
@@ -104,13 +205,28 @@ span.ori:hover {
     background-color: rgb(255, 0, 0);
 }
 
-#btn3 {
-    display: none;
+span.tabclose{
+    font-weight: 600;
+    display: inline-block;
+    text-align: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    /* background-color: coral; */
+}
+span.tabclose:hover{
+    color: white;
+    background-color: rgb(192, 192, 192);
 }
 
-#btn4 {
-    display: none;
+span.docker{
+    /* display: none; */
+    float: right;
 }
+
+/* #btn4 {
+    display: none;
+} */
 /* ==================================================== */
 #tooltip {
     text-align: center;
@@ -168,15 +284,23 @@ div>.title:hover {
 .progress-bar {
     border-radius: 4px;
     color: rgb(0, 0, 0);
-}#foot {
-    display:none;
-    width: 100%;
-    background-color: #f5f5f5;
 }
 
-#foot >p {
-    margin: 13px;
+footer {
+    /* display:none; */
+    width: 100%;
+    background-color: #f5f5f5;  
+    /* position: relative; */
+    bottom: 0;
 }
+
+footer>p {
+    padding: 13px;
+    margin: 0px;
+    margin-bottom: 0px;
+
+}
+
 
 
 
