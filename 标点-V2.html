@@ -12,7 +12,7 @@
     <script src="./punc/jquery.min.js"></script>
     <script src="./punc/popper.min.js"></script>
     <script src="./punc/bootstrap.min.js"></script>
-    <script src="./punc/clipboard.min.js"></script>
+    <!-- <script src="./punc/clipboard.min.js"></script> -->
 
     <!-- <script src="http://me.52fhy.com/doc/clipboardjs/dist/clipboard.min.js"></script> -->
     <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
@@ -46,15 +46,23 @@
         </nav>
     </header>
 
+    <div id='alertTool' class="alert alert-success alert-dismissable fixed-top">
+        已复制到剪贴板!
+    </div>
+
+    <div id="copyer" class="fixed-top">
+        <textarea id="clipArea" class="container-fluid"></textarea>
+    </div>
+
     <div id="tabContent" class="tab-content">
+        <div id='tooltip'></div>
         <div id="tab000" class="tab-pane fade container-fluid active">
             <div class="card">
                 <div class="card-header">
                     <span class="cardTitle">原始文本</span>
                     <span class="docker">
                         <button id="modal" class="btn btn-primary" data-toggle="modal" data-target="#myModal">模态框</button>
-                        <button id="copy000" class="btn btn-outline-warning" data-target="#result000" onclick="copyTxt(this)";
-                        }>复制</button>
+                        <button id="copy000" class="btn btn-outline-warning" data-target="#result000" onclick="copyTxt(this)" ; }>复制</button>
                         <button class="btn btn-outline-info" data-target="#result000" onclick="clearTxt(this)">清除</button>
                         <button type="button" class="btn btn-outline-success dropdown-toggle" data-toggle="dropdown">选择标点版本
                         </button>
@@ -78,24 +86,7 @@
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
 
-                <div id="radioGroup" class="modal-body row">
-                    <form action="" class="col-sm">
-                        <ul class="list-group border">
-                            <li class="dropdown-item">
-                                <input type="radio" name="version" value="V0">
-                                <span>V0</span>
-                            </li>
-                        </ul>
-                    </form>
-                    <form action="" class="col-sm">
-                        <ul class="list-group border">
-                            <li class="dropdown-item">
-                                <input type="radio" name="version" value="V1">
-                                <span>V1</span>
-                            </li>
-                        </ul>
-                    </form>
-                </div>
+                <div id="radioGroup" class="modal-body row"></div>
 
                 <div class="modal-footer">
                     <button id="OKbtn" type="button" class="btn btn-success" data-dismiss="modal" onclick="comparePro()">OK</button>

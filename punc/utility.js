@@ -20,23 +20,31 @@ $(document).ready(function () {
     TabIndex = 0;
 
     makeMune(version);
-    clipboard1 = new Clipboard('#copy01');
-    clipboard2 = new Clipboard('#copy02');
-    clipboard3 = new Clipboard('#copy03');
 
     $("#result000").keyup(function () {
-        check("#result000", '#tip000');
+        check("#result000");
     });
 
     $("#result000").mouseup(function () {
-        check("#result000", '#tip000');
+        check("#result000");
+    });
+
+    $(document).ready(function () {
+        $('[data-toggle="popover"]').popover();
     });
 
     $('#result000').val(TestText);
-    check("#result000", '#tip000');
+    check("#result000");
 
     $('#tablink000').click();
-    TabRecord.push(["V0", 0, ""]);
+    TabRecord.push({
+        ver: 'V0',
+        index: 0,
+        linkid: "#tablink000",
+        tabid: "#result000",
+        text: "",
+        response: ""
+    });
 })
 
 var makeMune = function (list) {
@@ -49,9 +57,8 @@ var makeMune = function (list) {
         a.innerHTML = adata.text;
         a.dataset.port = adata.port;
         a.onclick = function (e) {
-            select(e.srcElement);
+            selectItem(e.srcElement);
         };
-        // a.onclick=select(this);
         dpmenu.append(a);
     }
     dpmenu.append('<div class="dropdown-divider"></div>');
@@ -59,7 +66,7 @@ var makeMune = function (list) {
     a.className = "dropdown-item";
     a.innerHTML = '全部版本';
     a.onclick = function (e) {
-        select(e.srcElement);
+        selectItem(e.srcElement);
     };
     dpmenu.append(a);
 }
@@ -75,46 +82,68 @@ var process = function () {
     }
 
     var txt = $("#result000").val();
-    if (txt == "")
-        return;
+    if (txt === "") return;
 
     var ver = Pool[0].ver;
     var port = Pool[0].port;
 
+    var dic = new Array();
+    var newText = new Array();
+    var txtList = txt.split("\n\n");
+    for (var i = 0; i < txtList.length; i++) {
+        txtList[i] = txtList[i].replace(/(\n| |　|\d)/g, '');
+        var str = txtList[i];
+        if (str != "") {
+            var mstr = repPunc(str, '');
+            if (mstr != '') {
+                dic.push({ "src": mstr });
+                newText.push(mstr);
+                txtList[i] = str;
+            }
+        }
+    }
+
+    var otxt = '#'+txtList.join('\n\n')+'@';
+    otxt=otxt.replace(/(\n\n\n+)/g, '\n\n');
+    otxt=otxt.replace(/#\n{0,}/g, '');
+    otxt=otxt.replace(/\n{0,}@/g, '');
+
+    var sameTab = false;
     for (var i = 0; i < TabRecord.length; i++) {//no repeat
-        if (TabRecord[i][0] === ver) {
+        if (TabRecord[i].ver === ver) {
             Pool = Pool.slice(1);
+
+            if (otxt != TabRecord[0].text) {
+                sameTab = true;
+                break;
+            }
+
             if (Pool.length == 0)
-                $('#tablink' + justify(TabRecord[i][1], 3)).click();
+                $('#tablink' + justify(TabRecord[i].index, 3)).click();
             else
                 setTimeout(process, 100);
             return;
         }
     }
 
-    var dic = new Array();
-    var newText = new Array();
-    var txtList = txt.split("\n\n");
-    for (var i = 0; i < txtList.length; i++) {
-        var str = txtList[i];
-        str = str.replace(/(\n| |　|\d)/g, '');
-        if (str != "") {
-            mstr = repPunc(str, '');
-            if (mstr != '')
-                dic.push({ "src": mstr });
-            newText.push(mstr);
-            txtList[i] = str;
-        }
-    }
-
     PlainText = newText.join('\n\n');
-    var otxt = txtList.join('\n\n');
-    $("#result000").val(otxt);
-    check("#result000", '#tip000');
-    TabRecord[0][2]=$("#result000").val();
 
-    addResultTab(ver, ++TabIndex, "", "&nbsp;");
-    TabRecord.push([ver, TabIndex, ""]);
+    $("#result000").val(otxt);
+    check("#result000");
+    TabRecord[0].text = $("#result000").val();
+
+    if (!sameTab) {
+        addResultTab(ver, ++TabIndex, "", "&nbsp;");
+
+        TabRecord.push({
+            ver: ver,
+            index: TabIndex,
+            linkid: "#tablink" + justify(TabIndex, 3),
+            tabid: "#result" + justify(TabIndex, 3),
+            text: "",
+            response: ""
+        });
+    }
 
     if (dic.length != 0)
         postText(dic, port, TabIndex);
@@ -122,7 +151,7 @@ var process = function () {
     setTimeout(process, 100);
 }
 
-var check = function (e, t) {
+var check = function (e) {
     if ('#result000' == e) {
         $(e)[0].style.height = 'auto';
         $(e)[0].style.height = $(e)[0].scrollHeight + 'px';
@@ -133,10 +162,32 @@ var check = function (e, t) {
     pstr = repPunc(str, '');
     punc = str.replace(Reg2, '');
 
-    $(t).html("字数:" + str.length + "(" + pstr.length + "/" + punc.length + ")");
+    var tip = e.replace('result', 'tip');
+    var str = "字数:" + str.length + "(" + pstr.length + "/" + punc.length + ")";
+
+    var list = $(e + '>span');
+    var warn = 0, edit = 0;
+    for (let i = 0; i < list.length; i++) {
+        if (list[i].dataset.state === 'warn')
+            ++warn;
+        else if (list[i].dataset.state === 'edit')
+            ++edit;
+    }
+
+    if (warn != 0) {
+        str += ' ' + addtag('span', '警告', '', '', 'warn').outerHTML;
+        str += ':' + warn;
+    }
+
+    if (edit != 0) {
+        str += ' ' + addtag('span', '修改', '', '', 'edit').outerHTML;
+        str += ':' + edit;
+    }
+
+    $(tip).html(str);
 }
 
-var select = function (e) {
+var selectItem = function (e) {
     var t = e.text;
     if (t === "全部版本") {
         for (var i = 0; i < version.length; i++) {
@@ -150,12 +201,12 @@ var select = function (e) {
         var v = e.innerHTML.replace(/(.*（|）.*)/g, '');
         Pool.push({ 'port': p, 'ver': v });
     }
-    setTimeout(process(), 100);
+    setTimeout(process, 100);
 }
 
 var compare = function (e) {
     if (TabRecord.length < 3)
-        setCompare(TabRecord[0][0], TabRecord[1][0]);
+        setCompare(TabRecord[0].ver, TabRecord[1].ver);
     else {
         addSelectItem(TabRecord);
     }
@@ -164,20 +215,20 @@ var compare = function (e) {
 var setCompare = function (ver1, ver2) {//Ver1 < Ver2
     var ver = ver1 + " & " + ver2;
     for (var i = 0; i < TbandTbRecord.length; i++) {
-        if (TbandTbRecord[i][0] === ver) {
-            setTimeout(function () { $("#tablink" + justify(TbandTbRecord[i][1], 3)).click(); }, 100);
+        if (TbandTbRecord[i].ver === ver) {
+            setTimeout(function () {
+                $(TbandTbRecord[i].linkid).click();
+            }, 100);
             return;
         }
     }
 
     var otxt, ptxt;
     for (var i = 0; i < TabRecord.length; i++) {
-        if (TabRecord[i][0] === ver1) {
-            var id = "#result" + justify(TabRecord[i][1], 3);
-            otxt = TabRecord[i][2];
-        } else if (TabRecord[i][0] === ver2) {
-            var id = "#result" + justify(TabRecord[i][1], 3);
-            ptxt = TabRecord[i][2];
+        if (TabRecord[i].ver === ver1) {
+            otxt = TabRecord[i].text;
+        } else if (TabRecord[i].ver === ver2) {
+            ptxt = TabRecord[i].text;
         }
     }
 
@@ -190,31 +241,89 @@ var setCompare = function (ver1, ver2) {//Ver1 < Ver2
 
     newMap = mapProcess(newMap);
     var newTxt = combine(PlainText, newMap);
-    newTxt = spanner(newTxt);
+    var newHtml = addSpan(newTxt);
 
     for (var i = 0; i < newMap.length; i++) {
         var tag = newMap[i].replace(/[^a-z]/g, '');
         var chr = newMap[i].replace(/[\n-~]/g, '');
-        newTxt = newTxt.replace('<span class="word">' + chr + '<\/span>', '<span class="' + tag + '">' + chr + '<\/span>');
+        newHtml = newHtml.replace('<span class="word">' + chr + '<\/span>', '<span class="' + tag + '">' + chr + '<\/span>');
     }
 
-
     var note = '&ensp;<span class="ori">原始</span>&ensp;<span class="pro">已标点</span>';
-    addCompareTab(ver, ++TabIndex, newTxt, note);
-    TbandTbRecord.push([ver, TabIndex]);
+    addCompareTab(ver, ++TabIndex, newHtml, note);
+    TbandTbRecord.push({
+        ver: ver,
+        index: TabIndex,
+        linkid: "#tablink" + justify(TabIndex, 3),
+        tabid: "#compare" + justify(TabIndex, 3),
+        text: newTxt
+    });
 
-    setTimeout(function () { $("#tablink" + justify(TabIndex, 3)).click(); }, 100);
+
+    setTimeout(function () {
+        $("#tablink" + justify(TabIndex, 3)).click();
+    }, 100);
 }
 
 var clearTxt = function (e) {
-    var id=e.dataset.target;
+    var id = e.dataset.target;
     $(id).val("");
-    check("#result000", '#tip000');
+    check("#result000");
 }
 
-var copyTxt=function (e) {  
-    var id=e.dataset.target;
-    alert(id);
+var copyTxt = function (e) {
+    var id = e.dataset.target;
+    var txt = '';
+    if (id === "#result000") {
+        txt = $(id).val();
+    }
+    else if (id.search("result") != -1) {
+        txt = $(id).html();
+        txt = txt.replace(/<\/?s.+?>/g, '');
+        txt = txt.replace(/[ ]/g, '');
+        txt = txt.replace(/<br>/g, '\n');
+    }
+    else if (id.search("compare") != -1) {
+        txt = $(id).html();
+        txt = txt.replace(/<span class="word">/g, '');
+        txt = txt.replace(/<span class=/g, '@<');
+        txt = txt.replace(/<\/span>/g, '');
+        txt = txt.replace(/<br>/g, '\n');
+        txt = txt.replace(/@<"ori">/g, '@A');
+        txt = txt.replace(/@<"pro">/g, '@B');
+        txt = txt.replace(/@<"sam">/g, '');
+
+        txt = txt.replace(/@[AB]./g, '#');
+
+        var temp = txt.match(/@[AB]./g)
+        for (let i = 0; i < temp.length; i++) {
+            var newTg = temp[i].replace('@', '#');
+            txt = txt.replace(temp[i], newTg + '$');
+        }
+
+        txt = txt.replace(/\$#B/g, '|');
+        txt = txt.replace(/\$#A/g, '');
+
+        temp = txt.match(/#[AB].\$/g)
+        for (let i = 0; i < temp.length; i++) {
+            var newTg = temp[i];
+            if (newTg.indexOf('A') != -1)
+                newTg = newTg.replace(/#A/, '{').replace(/\$/, '|}');
+            else if (newTg.indexOf('B') != -1)
+                newTg = newTg.replace(/#B/, '{|').replace(/\$/, '}');
+            txt = txt.replace(temp[i], newTg);
+        }
+        txt = txt.replace(/#A/g, '{');//#A「$  -> {A|}
+        txt = txt.replace(/\$/g, '}');//#B，$  -> {|B}
+    }
+
+    $("#clipArea").val(txt);
+    $("#clipArea").select();
+    document.execCommand("Copy");
+    $("#alertTool").fadeIn();
+    setTimeout(() => {
+        $("#alertTool").fadeOut(1000);
+    }, 800);
 }
 
 // ----------------------------------------------------SubProcess
@@ -304,12 +413,12 @@ var postText = function (txtlis, prt, tabindex) {
         if (xhr.readyState == 4 && xhr.status == 200) {
             var str = xhr.responseText;
             str = eval(str);
-            var newTxt = "";
-            for (var i = 0; i < str.length; i++) {
-                newTxt += str[i].pred + '\n\n';
+
+            for (var i = 0; i < TabRecord.length; i++) {
+                if (TabRecord[i].index === tabindex)
+                    TabRecord[i].response = str;
             }
-            var ptxt = newTxt.slice(0, -2);
-            setResult(ptxt, xhr.tabindex);
+            setResult(str, xhr.tabindex);
         }
     }
 
@@ -320,33 +429,75 @@ var postText = function (txtlis, prt, tabindex) {
     xhr.send(data);
 }
 
-var setResult = function (txt, index) {
-    for (var i = 0; i < TabRecord.length; i++) {
-        if (TabRecord[i][1] == index)
-            TabRecord[i][2] = txt;
+var setResult = function (objary, index) {
+    var pred = "";
+    for (var i = 0; i < objary.length; i++) {
+        pred += objary[i].pred + '\n\n';
     }
-    var newTxt = spanner(txt);
+    pred = pred.slice(0, -2);
 
-    var punMap = pcMap(txt, 'pun');
-    for (var i = 0; i < punMap.length; i++) {
-        var tag = punMap[i].replace(/[^a-z]/g, '');
-        var chr = punMap[i].replace(/[\n-~]/g, '');
-        newTxt = newTxt.replace('<span class="word">' + chr + '<\/span>', '<span class="' + tag + '">' + chr + '<\/span>');
+    for (var i = 0; i < TabRecord.length; i++) {
+        if (TabRecord[i].index === index)
+            TabRecord[i].text = pred;
     }
+
+    var newTxt = addSpan(objary, 'prob');
+
     index = justify(index, 3);
     $("#result" + index).html(newTxt);
-    check("#result" + index, '#tip' + index);
+    check("#result" + index);
 }
 
-var spanner = function (txt) {
-    var ls = txt.split('');
-    txt = ''
-    for (var i = 0; i < ls.length; i++) {
-        txt += addtag(ls[i], 'span', 'word');
+var addSpan = function (objary, ifprob) {
+    var txt = '';
+    if (ifprob === 'prob') {
+        for (var i = 0; i < objary.length; i++) {
+            var pred = objary[i].pred;
+            var prob = objary[i].probs;
+            var list = objary[i].list;
+            for (var k = 0, z = -1; k < pred.length; k++) {
+                var x = pred[k];
+                var w = pred[k].replace(Reg1, '*');
+                var id, claname;
+                if (w != '*') {
+                    id = i + "_" + ++z;
+                    claname = 'word';
+                }
+                else {
+                    id = i + "_" + z;
+                    claname = 'punc';
+                }
+
+                var warning = judge(list, prob[z], 6000);
+                if (w == '*') warning = false;
+                if (warning)
+                    warning = 'warn';
+                else
+                    warning = '';
+                txt += addtag('span', pred[k], claname, id, warning).outerHTML;
+            }
+            txt += '<br><br>';
+        }
+        txt = txt.slice(0, txt.lastIndexOf('<br><br>'));
     }
-    txt = txt.replace(/<span class="word">\n<\/span>/g, '<br>');
-    setTimeout(showTooltip(), 100);
-    return txt
+    else {
+        var ls = objary.split('');
+        for (var i = 0; i < ls.length; i++) {
+            txt += addtag('span', ls[i], 'word', '', '').outerHTML;
+        }
+    }
+    setTimeout(showTooltip, 120);
+    return txt;
+}
+
+var judge = function (name, prob, threshold) {
+    var warning = true;
+    for (let i = 0; i < name.length; i++) {
+        var p = name[i];
+        var v = parseInt(prob[i]);
+        if (v > threshold) warning = false;
+    }
+    return warning;
 }
 
 var comparePro = function () {
@@ -383,7 +534,9 @@ var addSelectItem = function (list) {
 
     $('#OKbtn').attr("disabled", true);
 
-    setTimeout(function () { $("#modal").click(); }, 100);
+    setTimeout(function () {
+        $("#modal").click();
+    }, 100);
 }
 
 var makeForm = function (list, id) {
@@ -405,7 +558,7 @@ var makeForm = function (list, id) {
         var input = createE("input");
         input.type = "radio";
         input.name = "version";
-        input.value = list[i][0];
+        input.value = list[i].ver;
         input.onclick = function () {
             checkRadio();
         };
@@ -433,7 +586,7 @@ var addResultTab = function (ver, index, content, note) {
     copy.className = "btn btn-outline-warning";
     copy.dataset.target = "#result" + justify(index, 3);
     copy.innerHTML = "复制";
-    copy.onclick=function () {
+    copy.onclick = function () {
         copyTxt(this);
     }
 
@@ -467,7 +620,7 @@ var addCompareTab = function (ver, index, content, note) {
     copy.className = "btn btn-outline-warning";
     copy.dataset.target = "#compare" + justify(index, 3);
     copy.innerHTML = "复制";
-    copy.onclick=function () {
+    copy.onclick = function () {
         copyTxt(this);
     }
 
@@ -484,7 +637,7 @@ var addCompareTab = function (ver, index, content, note) {
 var addLink = function (ver, index) {
     var newlink = createE("li");
     newlink.className = "nav-item";
-    newlink.draggable="true";
+    newlink.draggable = "true";
 
     var a = createE("a");
     a.id = 'tablink' + justify(index, 3);
@@ -495,16 +648,6 @@ var addLink = function (ver, index) {
     a.ondblclick = function (e) {
         closeLink(e);
     }
-
-    // var span = createE("span");//----------------------------------------------
-    // span.className = "tabclose";
-    // span.innerHTML = "&times;";
-    // span.index = index;
-    // span.onclick = function (e) {
-    //     e.stopPropagation();//阻止冒泡
-    //     alert(e.target.index);
-    // }
-    // a.appendChild(span);//----------------------------------------------
 
     newlink.appendChild(a);
     $('#tabTitle').append(newlink);
@@ -546,7 +689,7 @@ var addTab = function (index, title, docker, vol, note) {
     $('#tabContent').append(newtab);
 }
 
-var closeLink=function (e) {  
+var closeLink = function (e) {
     var link = '#' + e.target.id;
     var tab = e.target.hash;
     var ver = e.target.text.trim();
@@ -556,19 +699,19 @@ var closeLink=function (e) {
 
     var max1 = 0, max2 = 0;
     for (var i = 0; i < TabRecord.length; i++) {
-        if (TabRecord[i][0] == ver)
+        if (TabRecord[i].ver == ver)
             TabRecord[i] = "";
-        else if (TabRecord[i][1] > max1)
-            max1 = TabRecord[i][1];
+        else if (TabRecord[i].index > max1)
+            max1 = TabRecord[i].index;
     }
     if (TabRecord.indexOf("") != -1)
         TabRecord.splice(TabRecord.indexOf(""), 1);
 
     for (var i = 0; i < TbandTbRecord.length; i++) {
-        if (TbandTbRecord[i][0] == ver)
+        if (TbandTbRecord[i].ver == ver)
             TbandTbRecord[i] = "";
-        else if (TbandTbRecord[i][1] > max2)
-            max2 = TbandTbRecord[i][1];
+        else if (TbandTbRecord[i].index > max2)
+            max2 = TbandTbRecord[i].index;
     }
     if (TbandTbRecord.indexOf("") != -1)
         TbandTbRecord.splice(TbandTbRecord.indexOf(""), 1);
@@ -579,61 +722,215 @@ var closeLink=function (e) {
 }
 
 // ----------------------------------------------------Basic
-var addtag = function (str, tg, classname) {
-    return '<' + tg + ' class="' + classname + '">' + str + '</' + tg + '>';
+var warnColor = 'rgb(255, 128, 128)';
+var editColor = 'rgb(220, 160, 255)';
+var addtag = function (tg, str, classname, id, state) {
+    var newTag;
+    if (str === '\n')
+        newTag = createE('br');
+    else {
+        newTag = createE(tg);
+        newTag.className = classname;
+        newTag.innerHTML = str;
+        if (id != '') newTag.id = id;
+        if (state != '') {
+            if (state === 'warn')
+                newTag.style.backgroundColor = warnColor;
+            else if (state === 'edit')
+                newTag.style.backgroundColor = editColor;
+
+            newTag.dataset.state = state;
+        }
+    }
+    return newTag;
 }
 
 var showTooltip = function () {
-    $(".word").click(function (e) {
+    $(".Result>span").click(function (e) {
         e.stopPropagation();//阻止冒泡
-        var list = [
-            { 'p': '？', 'v': '79%' },
-            { 'p': '。', 'v': '18%' },
-            { 'p': '！', 'v': '0.9%' }];
-        $('#tooltip').empty();
-        setTooltip(list);
-
-        var x = e.originalEvent.pageX + 15;
-        var y = e.originalEvent.pageY - 80 - 160;
-        var max_X = $(document)[0].body.clientWidth - 180;
-        x = x < 0 ? '0' : x;
-        x = x > max_X ? max_X : x;
-        y = y < -20 ? -20 : y;
-        $("#tooltip").css({ "top": y + "px", "left": x + "px" });
-        $('#tooltip').fadeIn();
+        showTip(e);
     });
+
+    $(".Result>span.pun").click(function (e) {
+        e.stopPropagation();//阻止冒泡
+        showTip(e);
+    });
+
+    $('#tooltip').click(function (e) {
+        e.stopPropagation();//阻止冒泡
+    });
+
     $(document).click(function (e) {
         $('#tooltip').fadeOut();
     });
 }
 
-var setTooltip = function (lis) {
-    $('#tooltip').append("<p id='tooltitle'>比例</p>");
-    for (var i = 0; i < lis.length; i++) {
-        var Div = createE("div");
+var showTip = function (e) {
+    var eid = e.target.id;
+    var text = e.target.innerText;
+    clickedSpan = e.target;
+    var pary, name;
+    var list = [];
+    var id = parseInt(eid);
+    var pib = '#' + e.target.parentElement.id;
+    for (var i = 0; i < TabRecord.length; i++) {
+        if (TabRecord[i].tabid === pib) {
+            pary = TabRecord[i].response[id];
+            pary = pary.probs;
+            name = TabRecord[i].response[id].list;
+        }
+    }
+    var index = e.target.id;
+    index = index.slice(parseInt(index.indexOf("_")) + 1);
+    pary = pary[parseInt(index)];
 
-        var title = createE("span");
-        title.className = 'title';
-        title.innerHTML = lis[i].p;
+    for (var i = 0; i < pary.length; i++) {
+        var num = parseInt(pary[i]);
+        var p = name[i];
+        var v;
+        // if (num === 0) v = ''
+        v = num / 100 + "%";
 
-        var data = createE("span");
-        data.className = 'data';
+        if (p === '') p = '　';
+        if (i > 0) {
+            var k;
+            for (k = 0; k < i; k++) {
+                if (num > list[k].n) {
+                    list.splice(k, 0, { p: p, v: v, n: num });
+                    break;
+                }
+            }
+            if (k === i)
+                // list.splice(k, 0, { p: p, v: v, n: num });
+                list.push({ p: p, v: v, n: num });
+        }
+        else
+            list.push({ p: p, v: v, n: num });
+    }
+
+    if (text === ' ') text = '　';
+    setTooltable(list, text, eid);
+
+    var left = e.originalEvent.pageX + 40;
+    var top = e.originalEvent.pageY - 120;
+    var max_X = $(document)[0].body.clientWidth - 220;
+    left = left < 0 ? '0' : left;
+    left = left > max_X ? max_X : left;
+    top = top < 95 ? 95 : top;
+    $("#tooltip").css({ "top": top + "px", "left": left + "px" });
+    $('#tooltip').fadeIn();
+}
+
+var setTooltable = function (list, title, target) {
+    $('#tooltip').empty();
+    $('#tooltip').append("<p id='tooltitle'>" + title + "</p>");
+    var Tb = createE("table");
+    Tb.className = "table table-bordered table-striped table-hover table-sm";
+    Tb.id = "probsTable";
+
+    for (var i = 0; i < list.length; i++) {
+        var Tr = createE("tr");
+        var Th = createE("th");
+        var Td = createE("td");
+        var span = createE("span");
+        span.innerHTML = list[i].p;
 
         var progress = createE("div");
         progress.className = 'progress';
+        progress.dataset.target = target;
+        progress.dataset.value = list[i].p;
+        progress.onclick = function (e) {
+            changePunc_SigMod(this);
+            $("#tipbtn").fadeIn();
+        }
 
         var progressbar = createE("div");
         progressbar.className = 'progress-bar';
-        progressbar.style = "width:" + lis[i].v;
-        progressbar.innerHTML = lis[i].v;
-
+        progressbar.style = "width:" + list[i].v;
+        progressbar.innerHTML = list[i].v;
         progress.appendChild(progressbar);
-        data.appendChild(progress);
 
-        Div.appendChild(title);
-        Div.appendChild(data);
-        $('#tooltip').append(Div);
+        Th.appendChild(span);
+        Td.appendChild(progress);
+        Tr.appendChild(Th);
+        Tr.appendChild(Td);
+        Tb.appendChild(Tr);
     }
+    $('#tooltip').append(Tb);
+}
+
+var clickedSpan;
+var changePunc_MltMod = function (e) {
+    var oriVal = clickedSpan.innerHTML;
+    var newVal = e.dataset.value;
+    if (newVal === "　") newVal = ' ';
+    if (oriVal != newVal) {
+        if (oriVal != ' ' && oriVal.replace(Reg1, '*') != '*') {//word
+            if (newVal != ' ') {
+                var span = createE("span");
+                span.id = clickedSpan.id;
+                span.className = "pun";
+                span.style.backgroundColor = editColor;
+                span.dataset.state = 'edit';
+                span.innerHTML = newVal;
+                $("#" + clickedSpan.id).after(span);
+                $(".Result>span.pun").click(function (e) {
+                    e.stopPropagation();//阻止冒泡
+                    showTip(e);
+                });
+                clickedSpan.style.backgroundColor = '';
+                clickedSpan.dataset.state = '';
+            }
+        } else {//punc
+            clickedSpan.innerHTML = newVal;
+            $('#' + clickedSpan.id).css("background-color", "");
+            clickedSpan.style.backgroundColor = editColor;
+            clickedSpan.dataset.state = 'edit';
+        }
+        check('#' + clickedSpan.parentElement.id);
+    }
+    $('#tooltip').fadeOut();
+}
+
+var changePunc_SigMod = function (e) {
+    var oriVal = clickedSpan.innerHTML;
+    var newVal = e.dataset.value;
+    if (newVal === "　") newVal = ' ';
+    if (oriVal != newVal) {
+        if (oriVal != ' ' && oriVal.replace(Reg1, '*') != '*') {//word
+            var group = $("[id='" + clickedSpan.id + "']");
+            if (group.length >= 2) {
+                var span = group[1];
+                // print(group[1]);
+                span.innerHTML = newVal;
+                span.style.backgroundColor = editColor;
+                span.dataset.state = 'edit';
+                clickedSpan.style.backgroundColor = '';
+                clickedSpan.dataset.state = '';
+            } else if (newVal != ' ') {
+                var span = createE("span");
+                span.id = clickedSpan.id;
+                span.className = "punc";
+                span.style.backgroundColor = editColor;
+                span.dataset.state = 'edit';
+                span.innerHTML = newVal;
+                $("#" + clickedSpan.id).after(span);
+                $(".Result>span.punc").click(function (e) {
+                    e.stopPropagation();//阻止冒泡
+                    showTip(e);
+                });
+                clickedSpan.style.backgroundColor = '';
+                clickedSpan.dataset.state = '';
+            }
+        } else {//punc
+            clickedSpan.innerHTML = newVal;
+            $('#' + clickedSpan.id).css("background-color", "");
+            clickedSpan.style.backgroundColor = editColor;
+            clickedSpan.dataset.state = 'edit';
+        }
+        check('#' + clickedSpan.parentElement.id);
+    }
+    $('#tooltip').fadeOut();
 }
 
 var createE = function (e) {
@@ -652,5 +949,9 @@ var justify = function (num, len) {
 
 var print = function (param) {
     console.log(param);
+}
+
+var addBold = function (str) {
+    return '<b>' + str + '</b>';
 }
 // ----------------------------------------------------End
